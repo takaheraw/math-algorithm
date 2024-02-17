@@ -4,21 +4,23 @@ def merge_sort(arr)
 
   # 2 つに分割した後、小さい配列をソート
   mid = arr.length / 2
-  a_dash = merge_sort(arr[0...mid])
-  b_dash = merge_sort(arr[mid..-1])
+  left_half = merge_sort(arr[0...mid])
+  right_half = merge_sort(arr[mid..-1])
 
   # 以下が Merge 操作となります。
-  c = []
-  until a_dash.empty? || b_dash.empty?
-    c << if a_dash.first <= b_dash.first
-           a_dash.shift
-         else
-           b_dash.shift
-         end
-  end
+  merge(left_half, right_half)
+end
 
-  # 余った要素を追加
-  c.concat(a_dash).concat(b_dash)
+def merge(left, right)
+  result = []
+  until left.empty? || right.empty?
+    if left.first <= right.first
+      result << left.shift
+    else
+      result << right.shift
+    end
+  end
+  result + left + right
 end
 
 # 以下、メイン部分
