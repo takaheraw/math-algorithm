@@ -1,61 +1,55 @@
 #!/usr/bin/env ruby
 
-# 点と円の情報を読み込む
-input = gets.chomp.split.map(&:to_i)
-px, py = input[0], input[1]
-cx, cy, r = input[2], input[3], input[4]
+# 点の情報を読み込む
+point_line = gets.chomp.split.map(&:to_i)
+px, py = point_line[0], point_line[1]
 
-# 点Pと円の中心との距離を計算
-dist_p_to_center = Math.sqrt((px - cx)**2 + (py - cy)**2)
+# 円の情報を読み込む
+circle_line = gets.chomp.split.map(&:to_i)
+cx, cy, r = circle_line[0], circle_line[1], circle_line[2]
 
-# 接点の座標を計算
-# 点Pからの接線の長さ
-tangent_length = Math.sqrt(dist_p_to_center**2 - r**2)
+# 点と円の中心間の距離の2乗
+d_squared = (px - cx)**2 + (py - cy)**2
+
+# 接点を求める
+# https://en.wikipedia.org/wiki/Tangent_lines_to_circles#Tangent_from_a_point
 
 # 点Pから円の中心Cへのベクトル
-vec_pc_x = cx - px
-vec_pc_y = cy - py
+vx = cx - px
+vy = cy - py
 
-# ベクトルPCの長さ
-len_pc = dist_p_to_center
+# ベクトルの長さの2乗
+len_squared = vx**2 + vy**2
 
-# 点Pから円の中心Cへの単位ベクトル
-unit_pc_x = vec_pc_x / len_pc
-unit_pc_y = vec_pc_y / len_pc
+# 接線の長さの2乗
+tangent_len_squared = len_squared - r**2
 
-# 単位ベクトルPCに垂直な単位ベクトル（時計回りと反時計回り）
-unit_perp1_x = -unit_pc_y
-unit_perp1_y = unit_pc_x
-unit_perp2_x = unit_pc_y
-unit_perp2_y = -unit_pc_x
+# 接線の長さ
+tangent_len = Math.sqrt(tangent_len_squared)
 
-# 点Pから接点までの距離（コサイン定理より）
-dist_p_to_tangent = tangent_length
+# 円の中心から接点へのベクトルの長さ
+scale = r**2 / len_squared
 
-# 点Pから接点への方向ベクトルを計算
-# cos_theta = r / dist_p_to_center
-cos_theta = r / dist_p_to_center
-sin_theta = tangent_length / dist_p_to_center
+# 点Pから接点Tへのベクトルの係数
+t = r * tangent_len / len_squared
 
-# 2つの接点への方向ベクトル
-dir1_x = cos_theta * unit_pc_x + sin_theta * unit_perp1_x
-dir1_y = cos_theta * unit_pc_y + sin_theta * unit_perp1_y
+# 2つの接点を計算
+tangent_points = []
 
-dir2_x = cos_theta * unit_pc_x + sin_theta * unit_perp2_x
-dir2_y = cos_theta * unit_pc_y + sin_theta * unit_perp2_y
+# 1つ目の接点
+t1x = px + vx * scale - t * vy
+t1y = py + vy * scale + t * vx
+tangent_points << [t1x, t1y]
 
-# 接点の座標を計算
-tangent1_x = cx + r * dir1_x
-tangent1_y = cy + r * dir1_y
+# 2つ目の接点
+t2x = px + vx * scale + t * vy
+t2y = py + vy * scale - t * vx
+tangent_points << [t2x, t2y]
 
-tangent2_x = cx + r * dir2_x
-tangent2_y = cy + r * dir2_y
-
-# 接点を適切な順序にソート
-tangent_points = [[tangent1_x, tangent1_y], [tangent2_x, tangent2_y]]
+# x座標の小さい順にソート、同じ場合はy座標の小さい順
 tangent_points.sort_by! { |point| [point[0], point[1]] }
 
-# 結果を出力
+# 結果を出力（10桁の小数点）
 tangent_points.each do |point|
   puts format("%.10f %.10f", point[0], point[1])
 end
